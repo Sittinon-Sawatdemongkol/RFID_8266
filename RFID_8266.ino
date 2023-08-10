@@ -2,6 +2,8 @@
 #include "MFRC522.h"
 #include <FirebaseESP8266.h>
 #include <ESP8266WiFi.h>
+#include <ArduinoHttpClient.h>
+#include <WiFiClient.h>
 
 #define RST_PIN D1
 #define SS_PIN D2
@@ -11,7 +13,6 @@
 #define FIREBASE_KEY "2nyECFKpBSthELM3cbV6rjxEQodeJSuaTQviU2iF"
 
 FirebaseData firebaseData;
-bool state = false;
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 String rfid_in = "";
 
@@ -62,33 +63,12 @@ void connectWifi() {
 }
 //SaveonFirebase
 void sendToFirebase() {
- delay(1000);
-
-  // Create a unique key for the new node
-  String newNodeKey = "/RFID/USER/" + String(millis());
-
-  // Check if the same RFID data already exists in Firebase
-  String existingNodeKey = findExistingNode(rfid_in);
-
-  if (!existingNodeKey.isEmpty()) {
-    // Update the existing node
-    newNodeKey = existingNodeKey;
-  }
-
-  FirebaseJson json;
-  json.add("rfidData", rfid_in);
-  json.add("timestamp", String(millis()));  // Add a timestamp
-
-  if (Firebase.setJSON(firebaseData, newNodeKey, json)) {
-    Serial.println("Data added to Firebase");
-  } else {
-    Serial.println("Error : " + firebaseData.errorReason());
-  }
-}
-
-String findExistingNode(const String &rfidData) {
-  String existingKey = "";
-  return existingKey;
+delay(1000);
+    if(Firebase.setString(firebaseData, "/RFID/USER/", rfid_in)) {
+        Serial.println("Added"); 
+    } else {
+        Serial.println("Error : " + firebaseData.errorReason());
+    }
 }
 
   
